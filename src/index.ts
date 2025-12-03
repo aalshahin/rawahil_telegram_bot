@@ -1,9 +1,6 @@
-import dotenv from "dotenv";
 import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { LecturesService } from "./services/lectures.service.js";
 import { AdminsService } from "./services/admin.service.js";
-
-dotenv.config();
 
 const TOKEN = process.env.BOT_TOKEN;
 if (!TOKEN) throw new Error("there are no token!");
@@ -22,22 +19,16 @@ async function safeEditMessage(bot: TelegramBot, chatId: number, messageId: numb
       reply_markup: keyboard,
     });
   } catch (err: any) {
-    if (err.response && err.response.body && err.response.body.description && err.response.body.description.includes("message is not modified")) {
-      return null;
-    }
+    if (err.response?.body?.description?.includes("message is not modified")) return null;
     console.error("Edit error:", err);
   }
 }
 
 bot.onText(/\/start/, (msg: Message) => {
   const chatId = msg.chat.id;
-
   const branches = LecturesService.getBranches();
   const buttons = branches.map((b) => [{ text: b, callback_data: `branch|${b}` }]);
-
-  bot.sendMessage(chatId, "اختر الفرع:", {
-    reply_markup: { inline_keyboard: buttons },
-  });
+  bot.sendMessage(chatId, "اختر الفرع:", { reply_markup: { inline_keyboard: buttons } });
 });
 
 bot.on("callback_query", async (query: CallbackQuery) => {
@@ -48,10 +39,10 @@ bot.on("callback_query", async (query: CallbackQuery) => {
   const [action, branch, className, subject, lectureNo] = query.data.split("|");
 
   await bot.answerCallbackQuery(query.id);
+
   if (action === "branch") {
     const classes = LecturesService.getClasses(branch);
     const buttons = classes.map((c) => [{ text: c, callback_data: `class|${branch}|${c}` }]);
-
     return safeEditMessage(bot, chatId, msgId, `اختر المستوى في ${branch}:`, { inline_keyboard: buttons });
   }
 
@@ -71,80 +62,52 @@ bot.on("callback_query", async (query: CallbackQuery) => {
     const lecture = LecturesService.getLecture(branch, className, subject, Number(lectureNo));
     if (!lecture) return bot.sendMessage(chatId, "الدرس غير موجود.");
 
-    if (lecture.transcript_file_id) {
-      await bot.sendDocument(chatId, lecture.transcript_file_id, { caption: `تفريغ - ${subject}` });
-    }
-
-    if (lecture.summary_file_id) {
-      await bot.sendDocument(chatId, lecture.summary_file_id, { caption: `ملخص - ${subject}` });
-    }
-
-    if (lecture.youtube_url) {
-      await bot.sendMessage(chatId, lecture.youtube_url);
-    }
+    if (lecture.transcript_file_id) await bot.sendDocument(chatId, lecture.transcript_file_id, { caption: `تفريغ - ${subject}` });
+    if (lecture.summary_file_id) await bot.sendDocument(chatId, lecture.summary_file_id, { caption: `ملخص - ${subject}` });
+    if (lecture.youtube_url) await bot.sendMessage(chatId, lecture.youtube_url);
 
     if (AdminsService.isAdmin(query.from.id)) {
       await bot.sendMessage(chatId, "هل تريد تعديل رابط اليوتيوب؟", {
-        reply_markup: {
-          inline_keyboard: [[{ text: "نعم", callback_data: `yt|${branch}|${className}|${subject}|${lectureNo}` }]],
-        },
+        reply_markup: { inline_keyboard: [[{ text: "نعم", callback_data: `yt|${branch}|${className}|${subject}|${lectureNo}` }]] },
       });
     }
   }
 
   if (action === "yt") {
-    if (!AdminsService.isAdmin(query.from.id)) {
-      return bot.sendMessage(chatId, "❌ ليس لديك صلاحية تعديل الرابط.");
-    }
-
-    waitingForYoutube[chatId] = {
-      branch,
-      className,
-      subject,
-      lecture_no: Number(lectureNo),
-    };
-
+    if (!AdminsService.isAdmin(query.from.id)) return bot.sendMessage(chatId, "❌ ليس لديك صلاحية تعديل الرابط.");
+    waitingForYoutube[chatId] = { branch, className, subject, lecture_no: Number(lectureNo) };
     bot.sendMessage(chatId, "أرسل رابط اليوتيوب الجديد الآن:");
   }
 });
 
 bot.on("message", async (msg: Message) => {
   const chatId = msg.chat.id;
+
   if (waitingForYoutube[chatId]) {
     const info = waitingForYoutube[chatId];
     delete waitingForYoutube[chatId];
-
     LecturesService.updateYoutube(info.branch, info.className, info.subject, info.lecture_no, msg.text || "");
-
     return bot.sendMessage(chatId, "✅ تم تحديث رابط اليوتيوب بنجاح.");
   }
+
   if (msg.document) {
     const userId = msg.from?.id;
-
-    if (!AdminsService.isAdmin(userId!)) {
-      return bot.sendMessage(chatId, "❌ ليس لديك صلاحية رفع الملفات.");
-    }
+    if (!AdminsService.isAdmin(userId!)) return bot.sendMessage(chatId, "❌ ليس لديك صلاحية رفع الملفات.");
 
     const file = msg.document;
 
     const summaryMatch = file.file_name?.match(/ملخص_(.+)_الدرس(\d+)_المستوى(\d+)_([^\s]+)\.pdf/);
-
     if (summaryMatch) {
       const subject = summaryMatch[1];
       const lecture_no = Number(summaryMatch[2]);
       const className = `مستوى${summaryMatch[3]}`;
       const branch = summaryMatch[4];
-
       LecturesService.updateSummary(branch, className, subject, lecture_no, file.file_id);
-
       return bot.sendMessage(chatId, `📘 تم حفظ **ملخص الدرس ${lecture_no} - مادة ${subject}** في ${className} (${branch}) بنجاح.`);
     }
 
     const match = file.file_name?.match(/(.+)_الدرس(\d+)_المستوى(\d+)_([^\s]+)\.pdf/);
-
-    if (!match) {
-      return bot.sendMessage(chatId, "صيغة اسم الملف غير صحيحة.\nمثال: برمجة_الدرس3_المستوى2_علمي.pdf");
-    }
+    if (!match) return bot.sendMessage(chatId, "صيغة اسم الملف غير صحيحة.\nمثال: برمجة_الدرس3_المستوى2_علمي.pdf");
 
     const subject = match[1];
     const lecture_no = Number(match[2]);
