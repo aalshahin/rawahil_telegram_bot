@@ -1,0 +1,57 @@
+// {
+//   "Fajr": {
+//     "messages": [
+//       { "type": "sticker", "content": "CAACAgQAAxkBAAMJaRSKe4IdEKQRa5Lm_gh_yIqz6OUAArMGAAIX8soDmOxUISXDzmg2BA" },
+//       { "type": "text", "content": "الفجر يرحمني ويرحمكم الله" },
+//       { "type": "text", "content": "مَن صلَّى الصُّبحَ في جماعةٍ فَهوَ في ذمَّةِ اللَّهِ فانظرْ يا ابنَ آدمَ لا يطلبنَكَ اللَّهُ بشيءٍ مِن ذمَّتِهِ" }
+//     ]
+//   },
+//   "Dhuhr": {
+//     "messages": [
+//       { "type": "sticker", "content": "CAACAgQAAxkBAAMLaRSLuK7h7ZErAtV4O_j7a5f35AkAArUGAAIX8soDAfz4PNvxKE42BA" },
+//       { "type": "text", "content": "الظهر يرحمني ويرحمكم الله" },
+//       { "type": "text", "content": "أمَا إنَّه ليس في النومِ تفريطٌ، إنَّما التفريطُ على مَن لم يُصلِّ الصَّلاةَ حتى يَجيءَ وقتُ الصَّلاةِ الأُخرى" }
+//     ]
+//   },
+//   "Asr": {
+//     "messages": [
+//       { "type": "sticker", "content": "CAACAgQAAxkBAAMMaRSMT8JtvX9Pkw8xjGO7vJakq8cAArcGAAIX8soDzAWtaQGlYWc2BA" },
+//       { "type": "text", "content": "العصر يرحمني ويرحمكم الله" },
+//       { "type": "text", "content": "وقتُ العصرِ ما لم تَصفَرَّ الشَّمسُ" }
+//     ],
+//     "pre": {
+//       "minutesBefore": 30,
+//       "messages": [
+//         { "type": "sticker", "content": "CAACAgQAAxkBAAMGaRR4-nhhE7o1NMnFnAG4HnbsFWgAAn8CAAIX8soD9Op3MJUlKeA2BA" },
+//         { "type": "text", "content": "تذكير بصلاة الظهر بارك الله فيكم" }
+//       ]
+//     }
+//   },
+//   "Maghrib": {
+//     "messages": [
+//       { "type": "sticker", "content": "CAACAgQAAxkBAAMOaRSMilQXYy_RA8AucOFT5_aUJyIAArkGAAIX8soDwKkUr6jo-TM2BA" },
+//       { "type": "text", "content": "المغرب يرحمني ويرحمكم الله" },
+//       { "type": "text", "content": "أنَّ رسولَ اللهِ صلَّى اللهُ عليه وسلَّم كان يُصلِّي المغربَ إذا غرَبتِ الشَّمسُ، وتوارتْ بالحِجابِ" }
+//     ],
+//     "pre": {
+//       "minutesBefore": 25,
+//       "messages": [
+//         { "type": "sticker", "content": "CAACAgQAAxkBAAMGaRR4-nhhE7o1NMnFnAG4HnbsFWgAAn8CAAIX8soD9Op3MJUlKeA2BA" },
+//         { "type": "text", "content": "تلْكَ صلاةُ المنافقِ تلْكَ صلاةُ المنافقِ يرقبُ الشَّمسَ حتى إذا كانت بينَ قرني شيطانٍ قامَ فنقرَ أربعًا لا يذْكرُ اللَّهَ فيها إلَّا قليلًا" }
+//       ]
+//     }
+//   },
+//   "Isha": {
+//     "messages": [
+//       { "type": "sticker", "content": "CAACAgQAAxkBAAMSaRSMrTPWcTCii-BxLBtB9hYCamwAArsGAAIX8soDgmuWZBZlTWA2BA" },
+//       { "type": "text", "content": "العشاء يرحمني ويرحمكم الله" }
+//     ],
+//     "pre": {
+//       "minutesBefore": 30,
+//       "messages": [
+//         { "type": "sticker", "content": "CAACAgQAAxkBAAMGaRR4-nhhE7o1NMnFnAG4HnbsFWgAAn8CAAIX8soD9Op3MJUlKeA2BA" },
+//         { "type": "text", "content": "تذكير بصلاة المغرب بارك الله فيكم" }
+//       ]
+//     }
+//   }
+// }
