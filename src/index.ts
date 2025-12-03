@@ -2,8 +2,16 @@ import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { LecturesService } from "./services/lectures.service.js";
 import { AdminsService } from "./services/admin.service.js";
 
+console.log("Environment variables available:", Object.keys(process.env));
+console.log("BOT_TOKEN exists?", !!process.env.BOT_TOKEN);
+console.log("BOT_TOKEN length:", process.env.BOT_TOKEN?.length);
+
 const TOKEN = process.env.BOT_TOKEN;
-if (!TOKEN) throw new Error("there are no token!");
+if (!TOKEN) {
+  console.error("❌ BOT_TOKEN is missing!");
+  console.error("Available env vars:", Object.keys(process.env));
+  throw new Error("there are no token!");
+}
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
