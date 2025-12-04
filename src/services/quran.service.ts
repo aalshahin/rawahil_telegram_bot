@@ -1,35 +1,50 @@
-// import axios from "axios";
-// import TelegramBot from "node-telegram-bot-api";
+import axios from "axios";
+import TelegramBot from "node-telegram-bot-api";
 
-// export class QuranService {
-//   static TELEGRAM_MESSAGE_LIMIT = 4000;
+export class QuranService {
+    static TELEGRAM_MESSAGE_LIMIT = 4000;
 
-//   static async fetchAya(): Promise<string> {
-//     try {
-//       const randomAyaNumber = Math.floor(Math.random() * 6236) + 1;
+    static getRandomAyaNumber(): number {
+        return Math.floor(Math.random() * 6236) + 1;
+    }
 
-//       const url = `http://api.alquran.cloud/v1/ayah/${randomAyaNumber}/ar`;
-//       const res = await axios.get(url);
-//       const data = res.data?.data;
+    static async fetchAya(): Promise<{ text: string; surah: string } | null> {
+        try {
+            const ayaNumber = this.getRandomAyaNumber();
+            const url = `http://api.alquran.cloud/v1/ayah/${ayaNumber}/ar`;
 
-//       if (!data) return "No aya found";
+            const res = await axios.get(url);
+            const data = res.data?.data;
 
-//       const ayaText = data.text;
-//       const surahName = data.surah?.name || "";
+            if (!data) return null;
 
-//       return `${ayaText}\n*${surahName}*`;
-//     } catch (err) {
-//       console.error("Error fetching aya:", err);
-//       return "Failed to fetch aya";
-//     }
-//   }
+            return {
+                text: data.text,
+                surah: data.surah?.name || "",
+            };
+        } catch (err) {
+            console.error("Error fetching aya:", err);
+            return null;
+        }
+    }
 
-//   static async sendAya(bot: TelegramBot, chatId: number) {
-//     const message = await this.fetchAya();
+    static formatAya(text: string, surah: string): string {
+        return `${text}\n<b>${surah}</b>`;
+    }
 
-//     for (let i = 0; i < message.length; i += this.TELEGRAM_MESSAGE_LIMIT) {
-//       const chunk = message.substring(i, i + this.TELEGRAM_MESSAGE_LIMIT);
-//       await bot.sendMessage(chatId, chunk, { parse_mode: "Markdown" });
-//     }
-//   }
-// }
+    static async sendAya(bot: TelegramBot, chatId: number) {
+        const aya = await this.fetchAya();
+
+        if (!aya) {
+            await bot.sendMessage(chatId, "تعذّر جلب آية.");
+            return;
+        }
+
+        const message = this.formatAya(aya.text, aya.surah);
+
+        for (let i = 0; i < message.length; i += this.TELEGRAM_MESSAGE_LIMIT) {
+            const chunk = message.substring(i, i + this.TELEGRAM_MESSAGE_LIMIT);
+            await bot.sendMessage(chatId, chunk, { parse_mode: "HTML" });
+        }
+    }
+}

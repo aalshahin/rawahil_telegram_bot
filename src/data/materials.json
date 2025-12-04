@@ -1,3 +1,17 @@
 {
-  "branches": {}
+  "branches": {
+    "رجال": {
+      "مستوى1": {
+        "التدبر": [
+          {
+            "lecture_no": 1,
+            "title": "التدبر",
+            "transcript_file_id": "BQACAgQAAxkBAAMTaTG3kv5Is65Dor2BFByVyeEQGxsAAiAcAAIrx5FRsOhkYSoFvD42BA",
+            "summary_file_id": "",
+            "youtube_url": ""
+          }
+        ]
+      }
+    }
+  }
 }

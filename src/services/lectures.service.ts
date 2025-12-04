@@ -1,72 +1,55 @@
-import fs from "fs";
-import path from "path";
-
-export interface Lecture {
-  lecture_no: number;
-  title: string;
-  transcript_file_id: string;
-  summary_file_id: string;
-  youtube_url: string;
-}
-
-export interface Materials {
-  branches: {
-    [branch: string]: {
-      [className: string]: {
-        [subject: string]: Lecture[];
-      };
-    };
-  };
-}
-
-const DATA_PATH = path.resolve("./src/data/materials.json");
-
-function load(): Materials {
-  return JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-}
-
-function save(data: Materials): void {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
-}
+import { readJson, writeJson } from "../utils/file.js";
 
 export class LecturesService {
-  static getBranches(): string[] {
-    return Object.keys(load().branches);
+  private static PATH = "./src/data/materials.json";
+
+  private static load() {
+    return readJson(this.PATH);
   }
 
-  static getClasses(branch: string): string[] {
-    return Object.keys(load().branches[branch] || {});
+  private static save(data: any) {
+    writeJson(this.PATH, data);
   }
 
-  static getSubjects(branch: string, className: string): string[] {
-    return Object.keys(load().branches[branch]?.[className] || {});
+  private static ensurePath(data: any, branch: string, className: string, subject: string) {
+    data.branches[branch] ??= {};
+    data.branches[branch][className] ??= {};
+    data.branches[branch][className][subject] ??= [];
   }
 
-  static getLectures(branch: string, className: string, subject: string): Lecture[] {
-    return load().branches[branch]?.[className]?.[subject] || [];
+  static getBranches() {
+    return Object.keys(this.load().branches);
   }
 
-  static getLecture(branch: string, className: string, subject: string, lecture_no: number): Lecture | undefined {
-    return this.getLectures(branch, className, subject).find((l) => l.lecture_no === lecture_no);
+  static getClasses(branch: string) {
+    return Object.keys(this.load().branches[branch] || {});
   }
 
-  static addLecture(branch: string, className: string, subject: string, lecture: Partial<Lecture>) {
-    const data = load();
+  static getSubjects(branch: string, className: string) {
+    return Object.keys(this.load().branches[branch]?.[className] || {});
+  }
 
-    if (!data.branches[branch]) data.branches[branch] = {};
-    if (!data.branches[branch][className]) data.branches[branch][className] = {};
-    if (!data.branches[branch][className][subject]) data.branches[branch][className][subject] = [];
+  static getLectures(branch: string, className: string, subject: string) {
+    return this.load().branches[branch]?.[className]?.[subject] || [];
+  }
 
-    const existingIndex = data.branches[branch][className][subject].findIndex((l) => l.lecture_no === lecture.lecture_no);
-    if (existingIndex !== -1) {
-      const existing = data.branches[branch][className][subject][existingIndex];
-      existing.title = lecture.title || existing.title;
-      existing.transcript_file_id = lecture.transcript_file_id || existing.transcript_file_id;
-      existing.summary_file_id = lecture.summary_file_id || existing.summary_file_id;
-      existing.youtube_url = lecture.youtube_url || existing.youtube_url;
+  static getLecture(branch: string, className: string, subject: string, lectureNo: number) {
+    return this.getLectures(branch, className, subject).find((x: any) => x.lecture_no === lectureNo);
+  }
+
+  static addOrUpdateLecture(branch: string, className: string, subject: string, lecture: any) {
+    const data = this.load();
+    this.ensurePath(data, branch, className, subject);
+
+    const list = data.branches[branch][className][subject];
+
+    const index = list.findIndex((l: any) => l.lecture_no === lecture.lecture_no);
+
+    if (index !== -1) {
+      list[index] = { ...list[index], ...lecture };
     } else {
-      data.branches[branch][className][subject].push({
-        lecture_no: lecture.lecture_no!,
+      list.push({
+        lecture_no: lecture.lecture_no,
         title: lecture.title || subject,
         transcript_file_id: lecture.transcript_file_id || "",
         summary_file_id: lecture.summary_file_id || "",
@@ -74,42 +57,25 @@ export class LecturesService {
       });
     }
 
-    save(data);
+    this.save(data);
   }
 
-  static updateYoutube(branch: string, className: string, subject: string, lecture_no: number, url: string) {
-    const data = load();
+  static updateYoutube(branch: string, className: string, subject: string, lectureNo: number, url: string) {
+    const data = this.load();
 
-    if (!data.branches[branch]) return;
-    if (!data.branches[branch][className]) return;
-    if (!data.branches[branch][className][subject]) return;
+    const lecture = data.branches?.[branch]?.[className]?.[subject]
+      ?.find((x: any) => x.lecture_no === lectureNo);
 
-    const lecture = data.branches[branch][className][subject].find((l) => l.lecture_no === lecture_no);
-    if (lecture) lecture.youtube_url = url;
-
-    save(data);
-  }
-
-  static updateSummary(branch: string, className: string, subject: string, lecture_no: number, file_id: string) {
-    const data = load();
-
-    if (!data.branches[branch]) data.branches[branch] = {};
-    if (!data.branches[branch][className]) data.branches[branch][className] = {};
-    if (!data.branches[branch][className][subject]) data.branches[branch][className][subject] = [];
-
-    const lecture = data.branches[branch][className][subject].find((l) => l.lecture_no === lecture_no);
     if (lecture) {
-      lecture.summary_file_id = file_id;
-    } else {
-      data.branches[branch][className][subject].push({
-        lecture_no,
-        title: subject,
-        transcript_file_id: "",
-        summary_file_id: file_id,
-        youtube_url: "",
-      });
+      lecture.youtube_url = url;
+      this.save(data);
     }
+  }
 
-    save(data);
+  static updateSummary(branch: string, className: string, subject: string, lectureNo: number, fileId: string) {
+    this.addOrUpdateLecture(branch, className, subject, {
+      lecture_no: lectureNo,
+      summary_file_id: fileId
+    });
   }
 }

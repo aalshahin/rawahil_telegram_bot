@@ -1,17 +1,17 @@
-import fs from "fs";
-import path from "path";
+import { readJson } from "../utils/file.js";
 
-const ADMIN_PATH = path.resolve("./src/data/admin.json");
 export class AdminsService {
-  static load(): number[] {
+  private static PATH = "./src/data/admin.json";
+
+  static getAll(): number[] {
     try {
-      return JSON.parse(fs.readFileSync(ADMIN_PATH, "utf-8")).admins;
+      return readJson(this.PATH).admins;
     } catch {
       return [];
     }
   }
 
-  static isAdmin(userId: number): boolean {
-    return this.load().includes(userId);
+  static isAdmin(id: number): boolean {
+    return this.getAll().includes(id);
   }
 }
