@@ -2,15 +2,26 @@
   "branches": {
     "رجال": {
       "مستوى1": {
-        "التدبر": [
-          {
-            "lecture_no": 1,
-            "title": "التدبر",
-            "transcript_file_id": "BQACAgQAAxkBAAMTaTG3kv5Is65Dor2BFByVyeEQGxsAAiAcAAIrx5FRsOhkYSoFvD42BA",
-            "summary_file_id": "",
-            "youtube_url": ""
-          }
-        ]
+        "التدبر": {
+          "playlist_url": "",
+          "subject_summary_file_id": "",
+          "subject_questions_file_id": "",
+          "lectures": [
+            {
+              "lecture_no": 1,
+              "title": "التدبر",
+              "transcript_file_id": "BQACAgQAAxkBAAMTaTG3kv5Is65Dor2BFByVyeEQGxsAAiAcAAIrx5FRsOhkYSoFvD42BA",
+              "summary_file_id": "",
+              "youtube_url": "https://youtu.be/NxXjxpqFIpU?si=NJyq3W7twi_kxxeK"
+            }
+          ]
+        },
+        "التدبر_تجربة": {
+          "playlist_url": "",
+          "subject_summary_file_id": "BQACAgQAAxkBAAIGo2k1ggFtVhZnKNsqhUkFCCuaJj6GAALcGQAC4pupUaZ6B9f6CchiNgQ",
+          "subject_questions_file_id": "",
+          "lectures": []
+        }
       }
     }
   }
