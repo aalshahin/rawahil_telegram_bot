@@ -76,20 +76,12 @@ export class LecturesService {
     static addOrUpdateLecture(branch, className, subject, lecture) {
         const data = this.load();
         this.ensurePath(data, branch, className, subject);
-        const subjectData = data.branches[branch][className][subject];
-        const list = subjectData.lectures;
-        const index = list.findIndex((l) => l.lecture_no === lecture.lecture_no);
+        let lectures = data.branches[branch][className][subject].lectures;
+        const index = lectures.findIndex(l => l.lecture_no === lecture.lecture_no);
         if (index !== -1) {
-            list[index] = { ...list[index], ...lecture };
-        }
-        else {
-            list.push({
-                lecture_no: lecture.lecture_no,
-                title: lecture.title || subject,
-                transcript_file_id: lecture.transcript_file_id || "",
-                summary_file_id: lecture.summary_file_id || "",
-                youtube_url: lecture.youtube_url || "",
-            });
+            lectures[index] = { ...lectures[index], ...lecture };
+        } else {
+            lectures.push(lecture);
         }
         this.save(data);
     }
@@ -112,22 +104,19 @@ export class LecturesService {
     static updatePlaylist(branch, className, subject, url) {
         const data = this.load();
         this.ensurePath(data, branch, className, subject);
-        const subjectData = data.branches[branch][className][subject];
-        subjectData.playlist_url = url;
+        data.branches[branch][className][subject].playlist_url = url;
         this.save(data);
     }
     static updateSubjectSummary(branch, className, subject, fileId) {
         const data = this.load();
         this.ensurePath(data, branch, className, subject);
-        const subjectData = data.branches[branch][className][subject];
-        subjectData.subject_summary_file_id = fileId;
+        data.branches[branch][className][subject].subject_summary_file_id = fileId;
         this.save(data);
     }
     static updateSubjectQuestions(branch, className, subject, fileId) {
         const data = this.load();
         this.ensurePath(data, branch, className, subject);
-        const subjectData = data.branches[branch][className][subject];
-        subjectData.subject_questions_file_id = fileId;
+        data.branches[branch][className][subject].subject_questions_file_id = fileId;
         this.save(data);
     }
 }

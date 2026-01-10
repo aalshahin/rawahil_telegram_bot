@@ -5,8 +5,15 @@ export interface WaitingForYoutubeEntry {
     lecture_no: number;
     requestedBy: number;
 }
+export interface WaitingForPlaylistEntry {
+    branch: string;
+    className: string;
+    subject: string;
+    requestedBy: number;
+}
 
 export const waitingForYoutube: Record<number, WaitingForYoutubeEntry | undefined> = {};
+export const waitingForPlaylist: Record<number, WaitingForPlaylistEntry | undefined> = {};
 
 export interface WaitingForFileEntry {
     file_id: string;

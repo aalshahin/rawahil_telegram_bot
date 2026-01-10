@@ -1,3 +1,4 @@
+// index.ts
 import { createBot } from "./bot/bot.js";
 
 const token = process.env.BOT_TOKEN;

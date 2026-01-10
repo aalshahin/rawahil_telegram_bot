@@ -1,6 +1,8 @@
 import { LecturesService } from "../../services/lectures.service.js";
 import { AdminsService } from "../../services/admin.service.js";
 import { waitingForYoutube } from "../state.js";
+import { waitingForPlaylist } from "../state.js";
+
 export function setupLectureHandler(bot) {
     bot.on("message", async (msg) => {
         const chatId = msg.chat.id;
@@ -14,6 +16,25 @@ export function setupLectureHandler(bot) {
             waitingForYoutube[chatId] = undefined;
             LecturesService.updateYoutube(waiting.branch, waiting.className, waiting.subject, waiting.lecture_no, url);
             return bot.sendMessage(chatId, "✅ تم تحديث رابط اليوتيوب بنجاح.");
+        }
+        const playlistWaiting = waitingForPlaylist[chatId];
+        if (playlistWaiting) {
+            const senderId = msg.from?.id;
+            if (senderId !== playlistWaiting.requestedBy) {
+                return bot.sendMessage(chatId, "❌ هذه العملية محفوظة للمشرف الذي بدأها فقط.");
+            }
+
+            const url = msg.text?.trim() || "";
+            waitingForPlaylist[chatId] = undefined;
+
+            LecturesService.updatePlaylist(
+                playlistWaiting.branch,
+                playlistWaiting.className,
+                playlistWaiting.subject,
+                url
+            );
+
+            return bot.sendMessage(chatId, "✅ تم تحديث رابط الـ Playlist بنجاح.");
         }
         if (msg.document) {
             const userId = msg.from?.id;

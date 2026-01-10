@@ -2,6 +2,7 @@ import { LecturesService } from "../../services/lectures.service.js";
 import { AdminsService } from "../../services/admin.service.js";
 import { safeEditMessage, makeKeyboard } from "../../utils/messages.js";
 import { waitingForYoutube } from "../state.js";
+import { waitingForPlaylist } from "../state.js";
 export function setupNavigationHandler(bot) {
     bot.on("callback_query", async (query) => {
         const chatId = query.message?.chat.id;
@@ -43,6 +44,12 @@ export function setupNavigationHandler(bot) {
             }
             if (subjectData?.playlist_url) {
                 buttons.push([{ text: "▶️ Playlist", callback_data: `playlist|${branch}|${className}|${subject}` }]);
+            }
+            if (AdminsService.isAdmin(from.id)) {
+                buttons.push([{
+                    text: subjectData?.playlist_url ? "تعديل Playlist" : "إضافة Playlist",
+                    callback_data: `edit_playlist|${branch}|${className}|${subject}`
+                }]);
             }
             // Add lecture buttons
             lectures.forEach((l) => {
@@ -141,6 +148,24 @@ export function setupNavigationHandler(bot) {
                 requestedBy: from.id,
             };
             return bot.sendMessage(chatId, "أرسل رابط اليوتيوب الجديد الآن:");
+        }
+        if (action === "edit_playlist") {
+            const branch = parts[1];
+            const className = parts[2];
+            const subject = parts[3];
+
+            if (!AdminsService.isAdmin(from.id)) {
+                return bot.sendMessage(chatId, "❌ ليس لديك صلاحية التعديل.");
+            }
+
+            waitingForPlaylist[chatId] = {
+                branch,
+                className,
+                subject,
+                requestedBy: from.id
+            };
+
+            return bot.sendMessage(chatId, "أرسل الآن رابط الـ Playlist:");
         }
     });
 }

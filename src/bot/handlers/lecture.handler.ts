@@ -2,7 +2,7 @@
 import TelegramBot, { Message, CallbackQuery } from "node-telegram-bot-api";
 import { LecturesService } from "../../services/lectures.service.js";
 import { AdminsService } from "../../services/admin.service.js";
-import { waitingForYoutube, waitingForFile, WaitingForFileEntry } from "../state.js";
+import { waitingForYoutube, waitingForPlaylist, waitingForFile, WaitingForFileEntry } from "../state.js";
 
 export function setupLectureHandler(bot: TelegramBot) {
     // Handle document uploads
@@ -22,6 +22,20 @@ export function setupLectureHandler(bot: TelegramBot) {
 
             LecturesService.updateYoutube(youtubeWaiting.branch, youtubeWaiting.className, youtubeWaiting.subject, youtubeWaiting.lecture_no, url);
             return bot.sendMessage(chatId, "✅ تم تحديث رابط اليوتيوب بنجاح.");
+        }
+
+        // Handle Playlist URL input
+        const playlistWaiting = waitingForPlaylist[chatId];
+        if (playlistWaiting) {
+            if (userId !== playlistWaiting.requestedBy) {
+                return bot.sendMessage(chatId, "❌ هذه العملية محفوظة للمشرف الذي بدأها فقط.");
+            }
+
+            const url = msg.text?.trim() || "";
+            waitingForPlaylist[chatId] = undefined;
+
+            LecturesService.updatePlaylist(playlistWaiting.branch, playlistWaiting.className, playlistWaiting.subject, url);
+            return bot.sendMessage(chatId, "✅ تم تحديث رابط الـ Playlist بنجاح.");
         }
 
         // Handle file upload workflow - text input steps
